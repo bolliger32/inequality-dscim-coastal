@@ -1,15 +1,12 @@
 """Parameters and common functions to be used in notebook-based analysis workflow."""
 
+import os
 from pathlib import Path
+from zipfile import ZipFile
 
 from cloudpathlib import AnyPath
-from zipfile import ZipFile
-import os
-
-from pyCIAM import __file__
-
 from dask_gateway import GatewayCluster
-
+from pyCIAM import __file__ as pyciam_loc  # type: ignore
 
 SLIIDERS_VERS = "v1.2"
 RES_VERS = "regional-v0.1"
@@ -52,12 +49,14 @@ PATH_PARAMS = Path("params.json")
 PATH_SLIIDERS_OLD = DIR_RAW_EXT / "ciam_inputs/pyCIAM_inputs_v6_6_0.zarr"
 PATH_SLIIDERS = DIR_INT / "sliiders-ir.zarr"
 PATH_SLIIDERS_SEG = DIR_SCRATCH / "sliiders-seg.zarr"
+PATH_SLIIDERS_SEG_TMP = DIR_SCRATCH / "sliiders-seg-tmp.zarr"
 
 #####
 # SLR
 #####
 PATH_SLR_RAW = (
-    DIR_INT_EXT / "sea_levels/sea_level_rise_projections/all-workflows-all-ssps-v0.1.zarr"
+    DIR_INT_EXT
+    / "sea_levels/sea_level_rise_projections/all-workflows-all-ssps-v0.1.zarr"
 )
 DIR_SLR_GMSL_RAW = DIR_RAW_EXT / "slr/ar6/ar6/global/full_sample_workflows"
 PATH_SLR_INT = DIR_SCRATCH / "ar6-lsl.zarr"
@@ -74,12 +73,18 @@ PATHS_SURGE_LOOKUP = {
 }
 
 PATH_REFA = DIR_INT / "refa.zarr"
+PATH_REFA_GLOBALADAPT = DIR_INT / "refa-globaladapt.zarr"
 
 #########
 # OUTPUTS
 #########
 TMPPATH = DIR_SCRATCH / "pyciam-output-tmp.zarr"
+TMPPATH_FIXEDADAPT = DIR_SCRATCH / "pyciam-fixedadapt-tmp.zarr"
+TMPPATH_GLOBALADAPT = DIR_SCRATCH / "pyciam-globaladapt-tmp.zarr"
+
 PATH_OUTPUT = DIR_RES / "pyciam-output.zarr"
+PATH_OUTPUT_FIXEDADAPT = DIR_RES / "pyciam-fixedadapt-output.zarr"
+PATH_OUTPUT_GLOBALADAPT = DIR_RES / "pyciam-globaladapt-output.zarr"
 
 
 #######
@@ -129,7 +134,7 @@ def _zipdir(
 
 
 def upload_pyciam(client):
-    package_dir = Path(__file__).parent
+    package_dir = Path(pyciam_loc).parent
     zip_filename = "/tmp/pyCIAM.zip"  # Output ZIP file name
     _zipdir(package_dir, zip_filename)
     client.upload_file(zip_filename)
